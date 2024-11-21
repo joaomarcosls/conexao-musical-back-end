@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id  String @id @default(uuid())
+  nome  String
+  email   String @unique
+  cpf   String @unique
+  nivel   String
+  situacao  String
+  login   String @unique
+  senha   String
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  especialidades  EspecialidadeUsuario[]
+  servicos  Servico[]
+  servicosUsuarios  ServicoUsuario[]
+  @@map("usuarios")
+}
+
+
+model Especialidade {
+  id  String @id @default(uuid())
+  nome  String @db.VarChar(100) @unique
+  descricao  String @db.Text
+  nivel  Int @default(1)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  usuarios  EspecialidadeUsuario[]
+  servicos  Servico[]
+  @@map("especialidades")
+}
+
+model EspecialidadeUsuario {
+  id  String @id @default(uuid())
+  especialidadeId  String
+  usuarioId  String 
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  especialidade  Especialidade @relation(fields: [especialidadeId], references: [id])
+  usuario  Usuario @relation(fields: [usuarioId], references: [id])
+  @@map("especialidade_usuarios")
+}
+
+model Servico { 
+  id  String @id @default(uuid())
+  descricao  String @db.Text
+  especialidadeId  String
+  usuarioProfessorId  String
+  duracao  Int @default(0)
+  valor  Float @default(0)
+  data  DateTime @default(now()) @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  especialidade  Especialidade @relation(fields: [especialidadeId], references: [id])
+  usuarioProfessor  Usuario @relation(fields: [usuarioProfessorId], references: [id])
+  servicosUsuarios  ServicoUsuario[]
+  @@map("servicos")
+}
+
+
+model ServicoUsuario {
+  id  String @id @default(uuid())
+  servicoId  String
+  usuarioId  String
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  deletedAt   DateTime?
+  servico  Servico @relation(fields: [servicoId], references: [id])
+  usuario  Usuario @relation(fields: [usuarioId], references: [id])
+  @@map("servico_usuarios")
+}
